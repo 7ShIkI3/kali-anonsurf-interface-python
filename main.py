@@ -123,6 +123,10 @@ def main_menu(vpn):
                         vpn.set_ip(newIP)
             elif choix == '3':
                 execute_command('change')
+                ip = execute_command('myip')
+                if ip:
+                    newIP = ip_formating(ip)
+                    vpn.set_ip(newIP)
             elif choix == '4':
                 ip = execute_command('myip')
                 if ip:
