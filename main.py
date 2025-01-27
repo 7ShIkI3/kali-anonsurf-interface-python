@@ -6,6 +6,7 @@ from getpass import getpass
 class VPN:
     def __init__(self, status=False):
         self.ip = ""
+        self.localisation = ""
         self.active = status
     
     def set_ip(self, ip):
@@ -13,6 +14,12 @@ class VPN:
 
     def get_ip(self):
         return self.ip if self.ip else "Non disponible"
+    
+    def set_localisation(self, localisation):
+        self.localisation = localisation
+    
+    def get_localisation(self):
+        return self.localisation if self.localisation else "Non disponible"
     
     def set_status(self, status):
         self.active = status
@@ -82,6 +89,21 @@ def ip_formating(ipBrut):
     except:
         return "No Visible IP"
 
+def ip_location(ip):
+    """Récupération de la localisation de l'IP"""
+    try:
+        result = subprocess.run(
+            ['curl', f'https://ipapi.co/{ip}/json/'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        print(result.stdout.strip())
+        return result.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        print(f"\n[!] Erreur : {e.stderr.strip()}")
+        return None
+
 def clear_consol():
     subprocess.run(["clear"])
 
@@ -90,6 +112,7 @@ def show_status(vpn):
     print("\n" + "=" * 40)
     print(f"ANONSURF VPN - Statut : {'🟢 Actif' if vpn.get_status() else '🔴 Inactif'}")
     print(f"IP Actuelle : {vpn.get_ip()}")
+    print(f"Localisation : {ip_location(vpn.get_ip())}")
     print("=" * 40)
 
 def main_menu(vpn):
