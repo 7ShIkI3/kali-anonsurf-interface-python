@@ -1,3 +1,4 @@
+import requests
 import subprocess
 import sys
 import os
@@ -6,6 +7,7 @@ from getpass import getpass
 class VPN:
     def __init__(self, status=False):
         self.ip = ""
+        self.localisation = ""
         self.active = status
     
     def set_ip(self, ip):
@@ -13,6 +15,12 @@ class VPN:
 
     def get_ip(self):
         return self.ip if self.ip else "Non disponible"
+    
+    def set_localisation(self, localisation):
+        self.localisation = localisation
+    
+    def get_localisation(self):
+        return self.localisation if self.localisation else "Non disponible"
     
     def set_status(self, status):
         self.active = status
@@ -82,14 +90,23 @@ def ip_formating(ipBrut):
     except:
         return "No Visible IP"
 
+def ip_location(ip):
+    try:
+        response = requests.get(f'https://ipapi.co/{ip}/json/', timeout=15)
+        data = response.json()
+        return f"{data.get('city')}, {data.get('country_name')}"
+    except Exception as e:
+        return str(e)
+
 def clear_consol():
-    subprocess.run(["clear"])
+    subprocess.run(["clear"])   
 
 def show_status(vpn):
     """Affichage dynamique du statut"""
     print("\n" + "=" * 40)
     print(f"ANONSURF VPN - Statut : {'🟢 Actif' if vpn.get_status() else '🔴 Inactif'}")
     print(f"IP Actuelle : {vpn.get_ip()}")
+    print(f"Localisation : {vpn.get_localisation()}")
     print("=" * 40)
 
 def main_menu(vpn):
@@ -114,6 +131,8 @@ def main_menu(vpn):
                     if ip:
                         newIP = ip_formating(ip)
                         vpn.set_ip(newIP)
+                        location = ip_location(newIP)
+                        vpn.set_localisation(location)
             elif choix == '2':
                 if execute_command('stop'):
                     vpn.set_status(False)
@@ -121,17 +140,23 @@ def main_menu(vpn):
                     if ip:
                         newIP = ip_formating(ip)
                         vpn.set_ip(newIP)
+                        location = ip_location(newIP)
+                        vpn.set_localisation(location)
             elif choix == '3':
                 execute_command('change')
                 ip = execute_command('myip')
                 if ip:
                     newIP = ip_formating(ip)
                     vpn.set_ip(newIP)
+                    location = ip_location(newIP)
+                    vpn.set_localisation(location)
             elif choix == '4':
                 ip = execute_command('myip')
                 if ip:
                     newIP = ip_formating(ip)
                     vpn.set_ip(newIP)
+                    location = ip_location(newIP)
+                    vpn.set_localisation(location)
             elif choix == '9':
                 execute_command('stop')
                 print("\n[✓] Déconnexion propre effectuée")
@@ -154,6 +179,8 @@ if __name__ == "__main__":
         if ip:
             newIP = ip_formating(ip)
             vpn.set_ip(newIP)
+            location = ip_location(newIP)
+            vpn.set_localisation(location)
         main_menu(vpn)
     except Exception as e:
         print(f"[!] Erreur critique : {str(e)}")
